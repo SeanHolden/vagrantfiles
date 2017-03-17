@@ -1,0 +1,36 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+#
+# Before running vagrant up:
+# - Ensure that necessary ssh keys are added to ssh cookbook as templates
+# - Ensure that the below values are correct for your project
+#
+
+VAGRANT_CONFIG_VERSION = '2'
+
+Vagrant.configure(VAGRANT_CONFIG_VERSION) do |config|
+  config.vm.box = 'bento/centos-7.2'
+  config.vm.network 'forwarded_port', guest: 8080, host: 50000
+
+  config.vm.provision "chef_solo" do |chef|
+    chef.version = '12.17.44'
+    chef.cookbooks_path = '~/chef/cookbooks'
+    chef.roles_path = '~/chef/roles'
+    chef.add_role('npm')
+    chef.json = {
+      'git' => {
+        'email' => 'johndoe@example.com',
+        'name' => 'John Doe'
+      },
+      'dev_env' => {
+        'environment_variables' => %w(
+          EDITOR="vim"
+          PATH=~/.npm-global/bin:$PATH
+        ),
+        'repos' => %w(
+          git@github.com:example/example_project.git
+        )
+      }
+    }
+  end
+end
